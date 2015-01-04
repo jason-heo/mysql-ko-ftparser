@@ -39,7 +39,7 @@ FullText Parser Plugin을 어떻게 개발하는지 용도로 간단하게 만�
 
 - MeCab을 설치. MeCab 설치는 다음과 같이 2단계로 나뒨다.
  - MeCab 설치
- - 사전 설치
+ - 한글 사전(dic) 설치
 - 한글 FullText Parser Plugin을 다운받는다.
 - 컴파일 한다. 설치한다. 사용한다.
 
@@ -59,7 +59,7 @@ $ make
 $ make install
 ```
 
-### 1-2) 사전 설치
+### 1-2) 한글 사전(dic) 설치
 
 형태소 분석에 사용될 사전을 설치하는 단계로서 [은전한닢 프로젝트 홈][1]을 방문하시면 종종 사전 업데이트 소식이 올라온다. 형태소 분석에 가장 중요한 것이 바로 사전이므로 가급적 최신 버전을 설치하길 바란다.
 
@@ -129,7 +129,47 @@ MeCab의 경우 "동해물"을 "동"과 "해물"로 분석을 하였다. 어떤 
 
 다음 방법으로 한글 FullText Parser Plugin을 컴파일 한다.
 
-## 3) Plugin 설치 및 사용 방법
+`mysql_config` 및 `mecab-config`가 `PATH`에 등록되어 있어야 한다. 흔히들 소스 컴파일할 때 사용하는 `./configure`는 본인이 autotools 사용 방법을 몰라서 생략했다. 위의 두 파일이 없는 경우 컴파일에 오류가 생긴다.
+
+```
+$ git clone https://github.com/mysqlguru/mysql-ko-ftparser
+$ cd mysql-ko-ftparser/
+$ make
+```
+
+컴파일이 완료되었으면 간단한 테스트 프로그램을 실행하여 정상작동 여부를 확인해보자.
+
+```
+$ ./mecab_test
+동해물과백두산이 마르고 닳도록   <= 사용자가 입력한 내용
+- 해물                           <- 형태소 분석 결과 검색에 indexing될 단어
+- 백두산                         <- 상동
+---- end of result ----
+독도는우리땅
+- 독도
+- 우리
+- 땅
+---- end of result ----
+```
+
+워낙 간단히 구현하다보니 에러 처리를 완벽하게 하지 않았다. 예를 들어 사전 경로를 잘못 지정 한 경우 다음과 같은 에러를 출력하고 종료한다.
+
+```
+$ ./mecab_test
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  init failed:
+중지됨 (core dumped)
+
+```
+
+마지막으로 `make install`을 입력하면 Plugin이 MySQL의 plugin을 저장하는 path로 복사된다.
+
+```
+$ make install
+cp mysql-ko-ftparser.so `mysql_config --plugindir`
+```
+
+## 3) MySQL Plugin 설치 및 사용 방법
 
 ### 3-1) Plugin 설치 방법
 
