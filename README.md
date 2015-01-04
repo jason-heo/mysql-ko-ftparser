@@ -49,9 +49,10 @@ FullText Parser Plugin을 어떻게 개발하는지 용도로 간단하게 만�
 
 ### 1-1) MeCab 설치
 
-형태소 분석기 자체를 설치하는 단계로서 먼저 다음 파일을 다운받는다. https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.1.tar.gz
+형태소 분석기 자체를 설치하는 단계로서 먼저 다음 파일을 다운받는다.
 
 ```
+$ wget https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.1.tar.gz
 $ tar xvfz mecab-0.996-ko-0.9.1.tar.gz
 $ cd mecab-0.996-ko-0.9.1/
 $ ./configure --prefix=/path/to/mecab
@@ -63,11 +64,11 @@ $ make install
 
 형태소 분석에 사용될 사전을 설치하는 단계로서 [은전한닢 프로젝트 홈][1]을 방문하시면 종종 사전 업데이트 소식이 올라온다. 형태소 분석에 가장 중요한 것이 바로 사전이므로 가급적 최신 버전을 설치하길 바란다.
 
-우선 다음 파일을 다운는다. https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-1.6.1-20140515.tar.gz
 
 ```
-$ tar xvfz mecab-ko-dic-1.6.1-20140515.tar.gz
-$ cd mecab-ko-dic-1.6.1-20140515/
+$ wget https://bitbucket.org/eunjeon/mecab-ko-dic/downloads/mecab-ko-dic-1.6.1-20140814.tar.gz
+$ tar xvfz mecab-ko-dic-1.6.1-20140814.tar.gz
+$ cd mecab-ko-dic-1.6.1-20140814/
 $ ./configure --with-mecab-config=/path/to/mecab/bin/mecab-config
 $ make
 $ make install
@@ -102,10 +103,10 @@ MeCab이 잘 작동하는지 다음과 같이 테스트해보자
 
 ```
 $ echo "동해물과백두산이 마르고 닳도록. 독도는우리땅" | mecab
-동     MM,~명사,T,동,*,*,*,*,*
-해물  NNG,*,T,해물,*,*,*,*,*
+동해  NNP,지명,F,동해,*,*,*,*,*
+물     NNG,*,T,물,*,*,*,*,*
 과     JC,*,F,과,*,*,*,*,*
-백두산       NNP,인명,T,백두산,*,*,*,*,*
+백두산       NNP,지명,T,백두산,Compound,*,*,백두+산,백두/NNG/*/1/1+백두산/Compound/*/0/2+산/NNG/*/1/1
 이     JKS,*,F,이,*,*,*,*,*
 마르  VV,*,F,마르,*,*,*,*,*
 고     EC,*,F,고,*,*,*,*,*
@@ -121,9 +122,9 @@ EOS
 
 "MM", "NNG", "JC" 같은 것을 "품사"라고 하며 [품사 종류는 여기][8]서 확인할 수 있다.
 
-MeCab의 경우 "동해물"을 "동"과 "해물"로 분석을 하였다. 어떤 것이 정답인지 정의하긴 어렵지만 "동해"와 "물"로 분석하는 것이 맞다면 (혹은 "동해물"이 맞다면) MeCab의 한글 사전을 좋게 만들어야 한다. 현재 80만건 정도의 단어가 존재하며 부족한 수준이지만 이를 개인 프로젝트의 노력만으로 사전을 풍부하게 하긴 어려울 것이다.
+MeCab의 경우 "동해물"을 "동해"와 "물"로 분석을 하였다. 어떤 것이 정답인지 정의하긴 어렵지만 "동해물"로 분석하는 것이 맞다면 MeCab의 한글 사전을 좋게 만들어야 한다. 현재 80만건 정도의 단어가 존재하며 부족한 수준이지만 이를 개인 프로젝트의 노력만으로 사전을 풍부하게 하긴 어려울 것이다.
 
-"사전"에 단어는 직접 추가할 수 있으며 역시 [은전한닢 프로젝트 소개 slide][4]에서 볼 수 있다.
+"사전"에 단어를 직접 추가할 수 있으며 역시 [은전한닢 프로젝트 소개 slide][4]에서 볼 수 있다.
 
 ## 2) 한글 FullText Parser Plugin 컴파일
 
@@ -141,9 +142,10 @@ $ make
 
 ```
 $ ./mecab_test
-동해물과백두산이 마르고 닳도록   <= 사용자가 입력한 내용
-- 해물                           <- 형태소 분석 결과 검색에 indexing될 단어
-- 백두산                         <- 상동
+동해물과백두산이 마르고 닳도록
+- 동해
+- 물
+- 백두산
 ---- end of result ----
 독도는우리땅
 - 독도
@@ -230,15 +232,17 @@ $ myisam_ftdump test_native 1 --dump
 
 ```
 $ myisam_ftdump test_ko 1 --dump
+$ myisam_ftdump test_ko 1 --dump
        58            1.3796179 국민
        58            0.8148246 권력
        58            0.8148246 대한민국
        38            0.9666505 독도
+        0            0.9666505 동해
        38            0.9666505 땅
-        0            0.9775171 백두산
+        0            0.9666505 물
+        0            0.9666505 백두산
        38            0.9666505 우리
        58            0.8148246 주권
-        0            0.9775171 해물
 ```
 
 결과를 보면 알 수 있겠지만, '백두산'으로 검색한 경우 `test_ko`에서만 결과가 출력된다.
