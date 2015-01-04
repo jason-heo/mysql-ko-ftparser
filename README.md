@@ -154,6 +154,15 @@ $ ./mecab_test
 ---- end of result ----
 ```
 
+위의 결과는 실제 FullText Index에 저장될 단어들을 출력하는 예이다. [품사 태그][8] 중 명사, 숫자, 외국어 계열만 indexing을 한다. indexing되는 품사는 다음과 같다
+
+* 복합 명사 : Compound
+* 명사 계열 : NNG, NNP, NNB, NNBC, NP, NR
+* 외국어 : SL
+* 숫자 : SN
+
+품사를 추가하고 싶은 경우 `mecab_lib.cc`의 'is_indexable_node()`를 수정하면 된다.
+
 워낙 간단히 구현하다보니 에러 처리를 완벽하게 하지 않았다. 예를 들어 사전 경로를 잘못 지정 한 경우 다음과 같은 에러를 출력하고 종료한다.
 
 ```
