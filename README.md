@@ -227,7 +227,7 @@ INSERT INTO test_ko SELECT * FROM test_native;
 
 `myisam_ftdump` 명령을 이용하면 FullText 컬럼에 어떤 문자열이 indexing되었는지 확인 할 수 있다. 다음 명령은 MySQL Data directory의 해당 DB directory에서 실행시켜야 한다.
 
-MySQL 자체 FullText는 다음과 같은 문자열이 indexing되어있다.
+MySQL 자체 FullText는 다음과 같은 문자열이 indexing되어있다. (`ft_min_word_len = 4`로 설정되어 있어서 일부 문자는 indexing되지 않았다)
 
 ```
 $ myisam_ftdump test_native 1 --dump
