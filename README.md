@@ -1,3 +1,8 @@
+# 문서 UPDATE (2015.07.21.)
+
+MySQL 5.7에서는 Mecab이 기본 탑재되어 있습니다. 제가 만든 plugin을 굳이 사용할 필요가 없습니다. [MySQL 5.7 관련 메뉴얼](https://dev.mysql.com/doc/refman/5.7/en/fulltext-search-mecab.html)을 대충 읽어 보긴했는데 문제는 한글 사전이 없다는 것이네요. 아래 내용 중 "은전한닢"에서 구축한 한글 사전만 잘 복사해서 사용하신다면 MySQL에 기본으로 포함된 Mecab을 사용하시는 것이 안정성면에서 좋다고 생각합니다.
+
+
 #  소개
 
 [은전한닢 프로젝트][1]를 이용한 MySQL FullText Parser Plugin이다.
